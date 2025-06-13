@@ -5,10 +5,8 @@ author:
   - "Martin C. Arnold"
   - "Martin Schmelzer"
 date: "`r Sys.Date()`"
-format: live-html
 filters:
   - shinylive
-engine: knitr
 execute:
   echo: true
   eval: false

@@ -1,3 +1,4 @@
 project:
+  title: "shiny_exercises_solutions_shinylive"
   type: website
   output-dir: docs
