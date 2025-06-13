@@ -1,0 +1,46 @@
+# Quarto output
+*.pdf
+*.docx
+*.epub
+*.ipynb
+*.odt
+*.pptx
+*.tex
+*.log
+*.aux
+*.out
+*.toc
+*.gz
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+
+# R-related
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+.Rapp.history
+.Rcheck/
+
+# VSCode / RStudio
+.vscode/
+*.Rproj
+.Rproj.user/
+
+# Quarto cache and preview
+_quarto/
+*_cache/
+*cache*/  # for knitr default chunk caches
+*.knit.md
+*.utf8.md
+
+# Output folders
+_site/
+_publish/
+
+# System files
+.DS_Store
+Thumbs.db
+/.quarto/

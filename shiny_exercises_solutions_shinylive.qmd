@@ -1,0 +1,362 @@
+---
+title: "Advanced R for Econometricians: Shiny Exercises Solutions"
+subtitle: "Shiny Live Demos"
+author:
+  - "Martin C. Arnold"
+  - "Martin Schmelzer"
+date: "`r Sys.Date()`"
+format: live-html
+filters:
+  - shinylive
+engine: knitr
+execute:
+  echo: true
+  eval: false
+---
+
+# Exercise 1: Basic Scatter Plot
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 600
+
+library(shiny)
+library(gapminder)
+library(ggplot2)
+library(dplyr)
+library(DT)
+theme_set(theme_light())
+
+ui <- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices = c("lifeExp","pop","gdpPercap"),
+                  selected = "lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices = c("lifeExp","pop","gdpPercap"),
+                  selected = "gdpPercap")
+    ),
+    mainPanel(plotOutput("scatterPlot"))
+  )
+)
+
+server <- function(input, output) {
+  output$scatterPlot <- renderPlot({
+    ggplot(gapminder, aes_string(x=input$xvar, y=input$yvar)) +
+      geom_point() + expand_limits(x=0,y=0)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+# Exercise 2: Color and Size Mappings
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 600
+
+ui <- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis", 
+                  choices = names(gapminder)[4:6], selected="lifeExp"),
+      selectInput("yvar", "y-axis", 
+                  choices = names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by", 
+                  choices = c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by", 
+                  choices = names(gapminder)[4:6], 
+                  selected="pop")
+    ),
+    mainPanel(plotOutput("scatterPlot"))
+  )
+)
+
+server <- function(input, output) {
+  output$scatterPlot <- renderPlot({
+    ggplot(gapminder, 
+           aes_string(
+             x=input$xvar, 
+             y=input$yvar,
+             color=input$colvar, 
+             size=input$sizevar
+             )
+           ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+# Exercise 3: Year Slider
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 600
+
+ui <- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6], 
+                  selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6],
+                  selected="pop"),
+      sliderInput("year", "year",
+                  min=min(gapminder$year), max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,sep="")
+    ),
+    mainPanel(plotOutput("scatterPlot"))
+  )
+)
+
+server <- function(input, output) {
+  filteredData <- reactive({
+    gapminder %>% filter(year==input$year)
+  })
+
+  output$scatterPlot <- renderPlot({
+    ggplot(filteredData(), 
+           aes_string(
+             x=input$xvar,
+             y=input$yvar,
+             color=input$colvar,
+             size=input$sizevar
+             )
+           ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
+      ggtitle(paste("Year:", input$year))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+# Exercise 4: Action Button
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 600
+
+ui <- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6],selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6], 
+                  selected="pop"),
+      sliderInput(
+        "year", "year",
+                  min=min(gapminder$year),
+                  max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,
+                  sep=""
+                  ),
+      actionButton("goBtn","Update Plot")
+    ),
+    mainPanel(plotOutput("scatterPlot"))
+  )
+)
+
+server <- function(input, output) {
+  dataReactive <- eventReactive(input$goBtn, {
+    gapminder %>% filter(year==input$year)
+  })
+
+  output$scatterPlot <- renderPlot({
+    df <- dataReactive()
+    ggplot(df, aes_string(
+      x=input$xvar, 
+      y=input$yvar,
+      color=input$colvar, 
+      size=input$sizevar
+    )
+    ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
+      ggtitle(paste("Year:", input$year))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+# Exercise 5: Continent Aggregation
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 600
+
+ui <- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6], selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6], 
+                  selected="pop"),
+      sliderInput("year", "year",
+                  min=min(gapminder$year),
+                  max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,
+                  sep=""
+                  ),
+      checkboxInput("aggContinent","Only continents",FALSE),
+      actionButton("goBtn","Update Plot")
+    ),
+    mainPanel(
+      plotOutput("scatterPlot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  aggData <- reactive({
+    req(input$aggContinent)
+    gapminder %>%
+      group_by(continent,year) %>%
+      summarise(lifeExp=mean(lifeExp), pop=sum(pop),
+                gdpPercap=mean(gdpPercap), .groups="drop")
+  })
+
+  plotData <- eventReactive(input$goBtn, {
+    df <- if (input$aggContinent) aggData() else gapminder
+    df <- df %>% filter(year==input$year)
+    title <- if (input$aggContinent)
+      paste("Continent summary, Year:", input$year)
+    else paste("Year:", input$year)
+    list(df=df, title=title)
+  }, ignoreNULL=FALSE)
+
+  output$scatterPlot <- renderPlot({
+    pd <- plotData()
+    ggplot(pd$df, aes_string(
+      x=input$xvar, 
+      y=input$yvar,
+      color=input$colvar,
+      size=input$sizevar
+    )
+    ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
+      ggtitle(pd$title)
+  })
+
+}
+
+shinyApp(ui, server)
+```
+
+# Exercise 6: DataTable and Tab Panel
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 600
+
+ui <- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6], selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6], 
+                  selected="pop"),
+      sliderInput("year", "year",
+                  min=min(gapminder$year),
+                  max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,
+                  sep=""
+                  ),
+      checkboxInput("aggContinent","Only continents",FALSE),
+      actionButton("goBtn","Update")
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Plot", plotOutput("scatterPlot")),
+        tabPanel("Table", DT::dataTableOutput("dataTbl"))
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  baseData <- reactive({
+    if (input$aggContinent) {
+      gapminder %>% 
+        group_by(continent,year) %>% 
+        summarise(
+          lifeExp=mean(lifeExp),
+          pop=sum(pop),
+          gdpPercap=mean(gdpPercap),
+          .groups="drop"
+        )
+    } else gapminder
+  })
+
+  plotData <- eventReactive(input$goBtn, {
+    df <- baseData() %>% filter(year==input$year)
+    title <- if (input$aggContinent)
+      paste("Continent summary, Year:", input$year)
+    else paste("Year:", input$year)
+    list(df=df, title=title)
+  }, 
+  ignoreNULL=FALSE
+  )
+
+  output$scatterPlot <- renderPlot({
+    pd <- plotData()
+    ggplot(pd$df, aes_string(
+      x=input$xvar,
+      y=input$yvar,
+      color=input$colvar,
+      size=input$sizevar
+    )
+    ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) + ggtitle(pd$title)
+  })
+
+  output$dataTbl <- DT::renderDataTable({
+    plotData()$df
+  }, options=list(pageLength=10))
+}
+
+shinyApp(ui, server)
+```
+
