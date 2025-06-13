@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Our first r-shinylive Quarto document!</title>
+<title>Advanced R for Econometricians: Shiny Exercises Solutions</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -50,13 +50,21 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Our first r-shinylive Quarto document!</h1>
+<h1 class="title">Advanced R for Econometricians: Shiny Exercises Solutions</h1>
+<p class="subtitle lead">Shiny Live Demos</p>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Authors</div>
+    <div class="quarto-title-meta-contents">
+             <p>Martin Arnold </p>
+             <p>Martin Schmelzer </p>
+          </div>
+  </div>
     
   
     
@@ -72,11 +80,15 @@ ul.task-list li input[type="checkbox"] {
 #|   Please set `embed-resources: false` in your metadata.
 #| standalone: true
 #| viewerHeight: 600
-library(shiny)
-library(bslib)
-library(munsell)
+
+library(DT)
 library(gapminder)
 library(ggplot2)
+library(dplyr)
+library(munsell)
+library(shiny)
+
+theme_set(theme_light())
 
 # Define UI for app that draws a histogram ----
 ui &lt;- page_sidebar(
@@ -254,6 +266,220 @@ server &lt;- function(input, output) {
       geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
       ggtitle(paste("Year:", input$year))
   })
+}
+
+shinyApp(ui, server)</code></pre>
+</section>
+<section id="exercise-4-action-button" class="level1">
+<h1>Exercise 4: Action Button</h1>
+<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
+#|   shinylive does not work in self-contained HTML documents.
+#|   Please set `embed-resources: false` in your metadata.
+#| standalone: true
+#| viewerHeight: 600
+
+ui &lt;- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6],selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6], 
+                  selected="pop"),
+      sliderInput(
+        "year", "year",
+                  min=min(gapminder$year),
+                  max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,
+                  sep=""
+                  ),
+      actionButton("goBtn","Update Plot")
+    ),
+    mainPanel(plotOutput("scatterPlot"))
+  )
+)
+
+server &lt;- function(input, output) {
+  dataReactive &lt;- eventReactive(input$goBtn, {
+    gapminder %&gt;% filter(year==input$year)
+  })
+
+  output$scatterPlot &lt;- renderPlot({
+    df &lt;- dataReactive()
+    ggplot(df, aes_string(
+      x=input$xvar, 
+      y=input$yvar,
+      color=input$colvar, 
+      size=input$sizevar
+    )
+    ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
+      ggtitle(paste("Year:", input$year))
+  })
+}
+
+shinyApp(ui, server)</code></pre>
+</section>
+<section id="exercise-5-continent-aggregation" class="level1">
+<h1>Exercise 5: Continent Aggregation</h1>
+<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
+#|   shinylive does not work in self-contained HTML documents.
+#|   Please set `embed-resources: false` in your metadata.
+#| standalone: true
+#| viewerHeight: 600
+
+ui &lt;- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6], selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6], 
+                  selected="pop"),
+      sliderInput("year", "year",
+                  min=min(gapminder$year),
+                  max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,
+                  sep=""
+                  ),
+      checkboxInput("aggContinent","Only continents",FALSE),
+      actionButton("goBtn","Update Plot")
+    ),
+    mainPanel(
+      plotOutput("scatterPlot")
+    )
+  )
+)
+
+server &lt;- function(input, output) {
+  aggData &lt;- reactive({
+    req(input$aggContinent)
+    gapminder %&gt;%
+      group_by(continent,year) %&gt;%
+      summarise(lifeExp=mean(lifeExp), pop=sum(pop),
+                gdpPercap=mean(gdpPercap), .groups="drop")
+  })
+
+  plotData &lt;- eventReactive(input$goBtn, {
+    df &lt;- if (input$aggContinent) aggData() else gapminder
+    df &lt;- df %&gt;% filter(year==input$year)
+    title &lt;- if (input$aggContinent)
+      paste("Continent summary, Year:", input$year)
+    else paste("Year:", input$year)
+    list(df=df, title=title)
+  }, ignoreNULL=FALSE)
+
+  output$scatterPlot &lt;- renderPlot({
+    pd &lt;- plotData()
+    ggplot(pd$df, aes_string(
+      x=input$xvar, 
+      y=input$yvar,
+      color=input$colvar,
+      size=input$sizevar
+    )
+    ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
+      ggtitle(pd$title)
+  })
+
+}
+
+shinyApp(ui, server)</code></pre>
+</section>
+<section id="exercise-6-datatable-and-tab-panel" class="level1">
+<h1>Exercise 6: DataTable and Tab Panel</h1>
+<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
+#|   shinylive does not work in self-contained HTML documents.
+#|   Please set `embed-resources: false` in your metadata.
+#| standalone: true
+#| viewerHeight: 600
+
+ui &lt;- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6], selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6], 
+                  selected="pop"),
+      sliderInput("year", "year",
+                  min=min(gapminder$year),
+                  max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,
+                  sep=""
+                  ),
+      checkboxInput("aggContinent","Only continents",FALSE),
+      actionButton("goBtn","Update")
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Plot", plotOutput("scatterPlot")),
+        tabPanel("Table", DT::dataTableOutput("dataTbl"))
+      )
+    )
+  )
+)
+
+server &lt;- function(input, output) {
+  baseData &lt;- reactive({
+    if (input$aggContinent) {
+      gapminder %&gt;% 
+        group_by(continent,year) %&gt;% 
+        summarise(
+          lifeExp=mean(lifeExp),
+          pop=sum(pop),
+          gdpPercap=mean(gdpPercap),
+          .groups="drop"
+        )
+    } else gapminder
+  })
+
+  plotData &lt;- eventReactive(input$goBtn, {
+    df &lt;- baseData() %&gt;% filter(year==input$year)
+    title &lt;- if (input$aggContinent)
+      paste("Continent summary, Year:", input$year)
+    else paste("Year:", input$year)
+    list(df=df, title=title)
+  }, 
+  ignoreNULL=FALSE
+  )
+
+  output$scatterPlot &lt;- renderPlot({
+    pd &lt;- plotData()
+    ggplot(pd$df, aes_string(
+      x=input$xvar,
+      y=input$yvar,
+      color=input$colvar,
+      size=input$sizevar
+    )
+    ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) + ggtitle(pd$title)
+  })
+
+  output$dataTbl &lt;- DT::renderDataTable({
+    plotData()$df
+  }, options=list(pageLength=10))
 }
 
 shinyApp(ui, server)</code></pre>
