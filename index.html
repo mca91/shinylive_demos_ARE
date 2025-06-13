@@ -205,6 +205,59 @@ server &lt;- function(input, output) {
 
 shinyApp(ui, server)</code></pre>
 </section>
+<section id="exercise-3-year-slider" class="level1">
+<h1>Exercise 3: Year Slider</h1>
+<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
+#|   shinylive does not work in self-contained HTML documents.
+#|   Please set `embed-resources: false` in your metadata.
+#| standalone: true
+#| viewerHeight: 600
+
+ui &lt;- fluidPage(
+  titlePanel("Gapminder"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("xvar", "x-axis",
+                  choices=names(gapminder)[4:6], 
+                  selected="lifeExp"),
+      selectInput("yvar", "y-axis",
+                  choices=names(gapminder)[4:6], selected="gdpPercap"),
+      selectInput("colvar", "color by",
+                  choices=c("continent", names(gapminder)[4:6]), 
+                  selected="continent"),
+      selectInput("sizevar", "size by",
+                  choices=names(gapminder)[4:6],
+                  selected="pop"),
+      sliderInput("year", "year",
+                  min=min(gapminder$year), max=max(gapminder$year),
+                  value=min(gapminder$year),
+                  step=5,sep="")
+    ),
+    mainPanel(plotOutput("scatterPlot"))
+  )
+)
+
+server &lt;- function(input, output) {
+  filteredData &lt;- reactive({
+    gapminder %&gt;% filter(year==input$year)
+  })
+
+  output$scatterPlot &lt;- renderPlot({
+    ggplot(filteredData(), 
+           aes_string(
+             x=input$xvar,
+             y=input$yvar,
+             color=input$colvar,
+             size=input$sizevar
+             )
+           ) +
+      geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
+      ggtitle(paste("Year:", input$year))
+  })
+}
+
+shinyApp(ui, server)</code></pre>
+</section>
 
 </main>
 <!-- /main column -->
