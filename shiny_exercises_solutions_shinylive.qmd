@@ -5,6 +5,10 @@ author:
   - "Martin C. Arnold"
   - "Martin Schmelzer"
 date: "`r Sys.Date()`"
+format:
+  html:
+    resources: 
+      - shinylive-sw.js
 filters:
   - shinylive
 execute:
