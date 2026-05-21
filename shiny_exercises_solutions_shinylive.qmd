@@ -46,7 +46,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   output$scatterPlot <- renderPlot({
-    ggplot(gapminder, aes_string(x=input$xvar, y=input$yvar)) +
+    ggplot(gapminder, aes(x=.data[[input$xvar]], y=.data[[input$yvar]])) +
       geom_point() + expand_limits(x=0,y=0)
   })
 }
@@ -82,11 +82,11 @@ ui <- fluidPage(
 server <- function(input, output) {
   output$scatterPlot <- renderPlot({
     ggplot(gapminder, 
-           aes_string(
-             x=input$xvar, 
-             y=input$yvar,
-             color=input$colvar, 
-             size=input$sizevar
+           aes(
+             x=.data[[input$xvar]], 
+             y=.data[[input$yvar]],
+             color=.data[[input$colvar]], 
+             size=.data[[input$sizevar]]
              )
            ) +
       geom_point(alpha=0.7) + expand_limits(x=0, y=0)
@@ -134,11 +134,11 @@ server <- function(input, output) {
 
   output$scatterPlot <- renderPlot({
     ggplot(filteredData(), 
-           aes_string(
-             x=input$xvar,
-             y=input$yvar,
-             color=input$colvar,
-             size=input$sizevar
+           aes(
+             x=.data[[input$xvar]],
+             y=.data[[input$yvar]],
+             color=.data[[input$colvar]],
+             size=.data[[input$sizevar]]
              )
            ) +
       geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
@@ -191,13 +191,12 @@ server <- function(input, output) {
 
   output$scatterPlot <- renderPlot({
     df <- dataReactive()
-    ggplot(df, aes_string(
-      x=input$xvar, 
-      y=input$yvar,
-      color=input$colvar, 
-      size=input$sizevar
-    )
-    ) +
+    ggplot(df, aes(
+      x=.data[[input$xvar]], 
+      y=.data[[input$yvar]],
+      color=.data[[input$colvar]], 
+      size=.data[[input$sizevar]]
+    )) +
       geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
       ggtitle(paste("Year:", input$year))
   })
@@ -263,13 +262,12 @@ server <- function(input, output) {
 
   output$scatterPlot <- renderPlot({
     pd <- plotData()
-    ggplot(pd$df, aes_string(
-      x=input$xvar, 
-      y=input$yvar,
-      color=input$colvar,
-      size=input$sizevar
-    )
-    ) +
+    ggplot(pd$df, aes(
+      x=.data[[input$xvar]], 
+      y=.data[[input$yvar]],
+      color=.data[[input$colvar]],
+      size=.data[[input$sizevar]]
+    )) +
       geom_point(alpha=0.7) + expand_limits(x=0, y=0) +
       ggtitle(pd$title)
   })
@@ -344,13 +342,12 @@ server <- function(input, output) {
 
   output$scatterPlot <- renderPlot({
     pd <- plotData()
-    ggplot(pd$df, aes_string(
-      x=input$xvar,
-      y=input$yvar,
-      color=input$colvar,
-      size=input$sizevar
-    )
-    ) +
+    ggplot(pd$df, aes(
+      x=.data[[input$xvar]],
+      y=.data[[input$yvar]],
+      color=.data[[input$colvar]],
+      size=.data[[input$sizevar]]
+    )) +
       geom_point(alpha=0.7) + expand_limits(x=0, y=0) + ggtitle(pd$title)
   })
 
