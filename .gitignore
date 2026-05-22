@@ -11,6 +11,8 @@
 *.out
 *.toc
 *.gz
+# Allow WebR/shinylive binary assets in docs/
+!docs/**/*.gz
 *.bbl
 *.blg
 *.fdb_latexmk
