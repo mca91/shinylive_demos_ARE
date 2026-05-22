@@ -3,8 +3,7 @@ title: "Advanced R for Econometricians: Shiny Exercises Solutions"
 subtitle: "Shiny Live Demos"
 author:
   - "Martin C. Arnold"
-  - "Martin Schmelzer"
-date: "`r Sys.Date()`"
+date: "2026-05-21"
 format:
   html:
     resources: 
@@ -21,9 +20,12 @@ execute:
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+#| components: [editor, viewer]
+#| layout: vertical
 
 library(shiny)
 library(gapminder)
+library(munsell)
 library(ggplot2)
 library(dplyr)
 library(DT)
@@ -59,6 +61,13 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+
+library(shiny)
+library(gapminder)
+library(munsell)
+library(ggplot2)
+library(dplyr)
+theme_set(theme_light())
 
 ui <- fluidPage(
   titlePanel("Gapminder"),
@@ -102,6 +111,13 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+
+library(shiny)
+library(gapminder)
+library(munsell)
+library(ggplot2)
+library(dplyr)
+theme_set(theme_light())
 
 ui <- fluidPage(
   titlePanel("Gapminder"),
@@ -155,6 +171,13 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+
+library(shiny)
+library(gapminder)
+library(munsell)
+library(ggplot2)
+library(dplyr)
+theme_set(theme_light())
 
 ui <- fluidPage(
   titlePanel("Gapminder"),
@@ -211,6 +234,13 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+
+library(shiny)
+library(gapminder)
+library(munsell)
+library(ggplot2)
+library(dplyr)
+theme_set(theme_light())
 
 ui <- fluidPage(
   titlePanel("Gapminder"),
@@ -282,6 +312,14 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+
+library(shiny)
+library(gapminder)
+library(munsell)
+library(ggplot2)
+library(dplyr)
+library(DT)
+theme_set(theme_light())
 
 ui <- fluidPage(
   titlePanel("Gapminder"),

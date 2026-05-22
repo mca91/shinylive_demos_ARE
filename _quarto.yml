@@ -2,3 +2,11 @@ project:
   title: "shiny_exercises_solutions_shinylive"
   type: website
   output-dir: docs
+
+website:
+  title: "shiny_exercises_solutions_shinylive"
+  navbar: false
+
+format:
+  html:
+    output-file: index.html
