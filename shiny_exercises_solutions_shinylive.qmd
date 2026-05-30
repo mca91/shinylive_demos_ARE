@@ -61,6 +61,8 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+#| components: [editor, viewer]
+#| layout: vertical
 
 library(shiny)
 library(gapminder)
@@ -111,6 +113,8 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+#| components: [editor, viewer]
+#| layout: vertical
 
 library(shiny)
 library(gapminder)
@@ -171,6 +175,8 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+#| components: [editor, viewer]
+#| layout: vertical
 
 library(shiny)
 library(gapminder)
@@ -234,6 +240,8 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+#| components: [editor, viewer]
+#| layout: vertical
 
 library(shiny)
 library(gapminder)
@@ -312,6 +320,8 @@ shinyApp(ui, server)
 ```{shinylive-r}
 #| standalone: true
 #| viewerHeight: 600
+#| components: [editor, viewer]
+#| layout: vertical
 
 library(shiny)
 library(gapminder)
